@@ -16,92 +16,39 @@ const procesaCodigoTiempo = () => {
   console.log(codigoTiempo);
 };
 
-switch (codigoTiempo) {
-  case 0:
-    console.log("Cielo despejado");
-    break;
-  case 1:
-    console.log("Principalmente despejado");
-    break;
-  case 2:
-    console.log("");
-    break;
-  case 3:
-    console.log("");
-    break;
-  case 45:
-    console.log("");
-    break;
-  case 48:
-    console.log("Niebla y escarcha");
-    break;
-  case 51:
-    console.log("");
-    break;
-  case 53:
-    console.log("");
-    break;
-  case 55:
-    console.log("Llovizna");
-    break;
-  case 56:
-    console.log("");
-    break;
-  case 57:
-    console.log("Llovizna helada");
-    break;
-  case 61:
-    console.log("");
-    break;
-  case 63:
-    console.log("Lluvia");
-    break;
-  case 65:
-    console.log("");
-    break;
-  case 66:
-    console.log("");
-    break;
-  case 67:
-    console.log("Lluvia helada");
-    break;
-  case 71:
-    console.log("Nevadas");
-    break;
-  case 73:
-    console.log("");
-    break;
-  case 75:
-    console.log("");
-    break;
-  case 77:
-    console.log("Granos de nieve");
-    break;
-  case 80:
-    console.log("");
-    break;
-  case 81:
-    console.log("");
-    break;
-  case 82:
-    console.log("Lluvias ligeras a violentas");
-    break;
-  case 85:
-    console.log();
-    break;
-  case 86:
-    console.log("Chubascos de nieve");
-    break;
-  case 95:
-    console.log("Tormenta eléctrica");
-    break;
-  case 96:
-    console.log("");
-    break;
-  case 99:
-    console.log("Tormenta eléctrica con granizo");
-    break;
+// Mapa de códigos de tiempo y  descripciones
+const descripcionTiempo = new Map([
+  [0, "Cielo despejado"],
+  [[1, 2, 3], "Principalmente despejado"],
+  [[45, 48], "Niebla y escarcha"],
+  [[51, 53, 55], "Llovizna"],
+  [[56, 57], "Llovizna helada"],
+  [[61, 63, 65], "Lluvia"],
+  [[66, 67], "Lluvia helada"],
+  [[71, 73, 75], "Nevadas"],
+  [77, "Granos de nieve"],
+  [[80, 81, 82], "Lluvias ligeras a violentas"],
+  [[85, 86], "Chubascos de nieve"],
+  [95, "Tormenta eléctrica"],
+  [[96, 99], "Tormenta eléctrica con granizo"],
+]);
+
+// Para obtener la descripción
+function obtenerDescripcion(codigo) {
+  for (const [claves, descripcion] of descripcionTiempo) {
+    if (Array.isArray(claves)) {
+      if (claves.includes(codigo)) {
+        return descripcion;
+      }
+    } else if (claves === codigo) {
+      return descripcion;
+    }
+  }
+  return "Código desconocido";
 }
+
+// Ejemplo de uso
+console.log(obtenerDescripcion(3)); // "Principalmente despejado"
 
 const procesaDireccionViento = () => {
   let direccionViento = respuestaAPIenJSON.current.win_direction_10m;
