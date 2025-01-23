@@ -1,19 +1,21 @@
-import fetch from "node-fetch";
+const fetch = require("node-fetch");
 
 const teisLatitud = 42.2576;
 const teisLongitud = -8.683;
 let respuestaAPIenJSON = "";
+//https://api.open-meteo.com/v1/forecast?latitude=42.2576&longitude=-8.683&current_weather=true
 
 const obtenInformacionMeteo = async (latitud, longitud) => {
   const apiURL = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current_weather=true`;
   let respuestaAPI = await fetch(apiURL);
   respuestaAPIenJSON = await respuestaAPI.json();
-  console.log(respuestaAPI.OK);
+  //console.log(respuestaAPI.OK);
+  //console.log(respuestaAPI);
 };
-
+//console.log(obtenInformacionMeteo(42.2576, -8.683));
 const procesaCodigoTiempo = () => {
   let codigoTiempo = respuestaAPIenJSON.current_weather.weathercode;
-  console.log(codigoTiempo);
+  //console.log(codigoTiempo);
 };
 
 // Mapa de códigos de tiempo y  descripciones
@@ -51,54 +53,54 @@ function obtenerDescripcion(codigo) {
 console.log(obtenerDescripcion(3)); // "Principalmente despejado"
 
 const procesaDireccionViento = () => {
-  let direccionViento = respuestaAPIenJSON.current.win_direction_10m;
+  let direccionViento = respuestaAPIenJSON.current_weather.winddirection;
   //console.log("direcionViento");
 
   //function obtenerSector(direccionViento) { //elimino funcion para no tener una funcion dentro de otra funcion.
   if (direccionViento >= 337.5 || direccionViento < 22.5) {
-    return "Norte (N)";
+    console.log("Norte (N)");
   } else if (direccionViento >= 22.5 && direccionViento < 67.5) {
-    return "Noreste (NE)";
+    console.log("Noreste (NE)");
   } else if (direccionViento >= 67.5 && direccionViento < 112.5) {
-    return "Este (E)";
+    console.log("Este (E)");
   } else if (direccionViento >= 112.5 && direccionViento < 157.5) {
-    return "Sureste (SE)";
+    console.log("Sureste (SE)");
   } else if (direccionViento >= 157.5 && direccionViento < 202.5) {
-    return "Sur (S)";
+    console.log("Sur (S)");
   } else if (direccionViento >= 202.5 && direccionViento < 247.5) {
-    return "Suroeste (SW)";
+    console.log("Suroeste (SW)");
   } else if (direccionViento >= 247.5 && direccionViento < 292.5) {
-    return "Oeste (O)";
+    console.log("Oeste (O)");
   } else if (direccionViento >= 292.5 && direccionViento < 337.5) {
-    return "Noroeste (NW)";
+    console.log("Noroeste (NW)");
   } else if (direccionViento > 360 || 0 > direccionViento) {
-    return "Valor fuera de Rango. Debe ser entre 0 y 360";
+    console.log("Valor fuera de Rango. Debe ser entre 0 y 360");
   }
 };
 
 // Ejemplo de uso:
-console.log(obtenerSector(1)); // "Norte (N)"
-console.log(obtenerSector(45)); // "Noreste (NE)"
-console.log(obtenerSector(180)); // "Sur (S)"
-console.log(obtenerSector(270)); // "Oeste (O)"
+// console.log(procesaDireccionViento(1)); // "Norte (N)"
+// console.log(procesaDireccionViento(45)); // "Noreste (NE)"
+// console.log(procesaDireccionViento(180)); // "Sur (S)"
+// console.log(procesaDireccionViento(270)); // "Oeste (O)"
 
 const procesaVelocidadViento = () => {
-  let velocidadViento = respuestaAPIenJSON.current.wind_speed_10m;
+  let velocidadViento = respuestaAPIenJSON.current_weather.windspeed;
   console.log(velocidadViento);
   if (velocidadViento < 8) {
-    console.log("Frescachón");
+    console.log(`Velocidad viento: ${velocidadViento} km/h, Frescachón`);
   } else {
-    console.log("Temporal");
+    console.log(`Velocidad viento: ${velocidadViento} km/h, Temporal`);
   }
 };
 
 const procesaTemperatura = () => {
-  let codigoTemperatura = respuestaAPIenJSON.current.temperature_2m;
-  console.log(codigoTemperatura);
+  let codigoTemperatura = respuestaAPIenJSON.current_weather.temperature;
+
   if (codigoTemperatura < 18) {
-    console.log("Abrigate");
+    console.log(`Temperatura: ${codigoTemperatura}º, Abrigate`);
   } else {
-    console.log("Buen clima");
+    console.log(`Temperatura: ${codigoTemperatura}º, Buen clima`);
   }
 };
 
@@ -111,3 +113,12 @@ const main = async () => {
 };
 
 main();
+
+module.exports = {
+  obtenInformacionMeteo,
+  procesaCodigoTiempo,
+  obtenerDescripcion,
+  procesaDireccionViento,
+  procesaTemperatura,
+  procesaVelocidadViento,
+};
