@@ -8,14 +8,18 @@ let respuestaAPIenJSON = "";
 const obtenInformacionMeteo = async (latitud, longitud) => {
   const apiURL = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current_weather=true`;
   let respuestaAPI = await fetch(apiURL);
+  if (!respuestaAPI.ok) {
+    console.log(respuestaAPI);
+    throw new Error("Error en la solicitud.");
+  }
   respuestaAPIenJSON = await respuestaAPI.json();
   //console.log(respuestaAPI.OK);
   //console.log(respuestaAPI);
 };
 //console.log(obtenInformacionMeteo(42.2576, -8.683));
-const procesaCodigoTiempo = () => {
+const procesaCodigoTiempo = async () => {
   let codigoTiempo = respuestaAPIenJSON.current_weather.weathercode;
-  //console.log(codigoTiempo);
+  console.log(codigoTiempo);
 };
 
 // Mapa de códigos de tiempo y  descripciones
