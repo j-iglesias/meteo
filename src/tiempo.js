@@ -1,24 +1,23 @@
+process.emitWarning = () => {};
+
 const fetch = require("node-fetch");
 
-const teisLatitud = 42.2576;
-const teisLongitud = -8.683;
+//const teisLatitud = 42.2576;
+//const teisLongitud = -8.683;
 
-// Función para obtener la información meteorológica
 const obtenInformacionMeteo = async (latitud, longitud) => {
+  const apiURL = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current_weather=true`;
   try {
-    const apiURL = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current_weather=true`;
     const respuestaAPI = await fetch(apiURL);
-    if (!respuestaAPI.ok) {
-      throw new Error("Error en la solicitud a la API");
-    }
-    return await respuestaAPI.json();
+
+    const respuestaAPIenJSON = await respuestaAPI.json();
+    return respuestaAPIenJSON;
   } catch (error) {
-    console.error(error);
+    console.error("Algo no funciona majete");
     return null;
   }
 };
 
-// Mapa de códigos de tiempo y descripciones con emojis
 const descripcionTiempo = new Map([
   [0, "☀️ Cielo despejado"],
   [[1, 2, 3], "🌤 Principalmente despejado"],
@@ -49,6 +48,10 @@ const obtenerDescripcion = (codigo) => {
 };
 
 const procesaDireccionViento = (direccionViento) => {
+  if (direccionViento < 0 || direccionViento > 360) {
+    return "❓ Valor fuera de rango";
+  }
+
   if (direccionViento >= 337.5 || direccionViento < 22.5) return "Norte (N)";
   if (direccionViento >= 22.5 && direccionViento < 67.5) return "Noreste (NE)";
   if (direccionViento >= 67.5 && direccionViento < 112.5) return "Este (E)";
@@ -60,7 +63,6 @@ const procesaDireccionViento = (direccionViento) => {
   if (direccionViento >= 247.5 && direccionViento < 292.5) return "Oeste (O)";
   if (direccionViento >= 292.5 && direccionViento < 337.5)
     return "Noroeste (NW)";
-  return "❓ Valor fuera de rango";
 };
 
 const procesaVelocidadViento = (velocidadViento) => {
@@ -70,24 +72,15 @@ const procesaVelocidadViento = (velocidadViento) => {
 };
 
 const procesaTemperatura = (temperatura) => {
+  if (temperatura === undefined || temperatura === null) {
+    throw new Error("Error en la solicitud a la API");
+  }
   return temperatura < 18
     ? `🥶 ${temperatura}º - Abrígate`
     : `😎 ${temperatura}º - Buen clima`;
 };
 
-const main = async () => {
-  const datosMeteo = await obtenInformacionMeteo(teisLatitud, teisLongitud);
-  if (!datosMeteo) return;
-  console.log(obtenerDescripcion(datosMeteo.current_weather.weathercode));
-  console.log(procesaDireccionViento(datosMeteo.current_weather.winddirection));
-  console.log(procesaTemperatura(datosMeteo.current_weather.temperature));
-  console.log(procesaVelocidadViento(datosMeteo.current_weather.windspeed));
-};
-
-// Ejecutar
-//main();
-
-// Exportar funciones para pruebas con Jest
+//Exportar funciones para pruebas con Jest
 module.exports = {
   obtenInformacionMeteo,
   obtenerDescripcion,
@@ -95,31 +88,3 @@ module.exports = {
   procesaTemperatura,
   procesaVelocidadViento,
 };
-
-/* // Pruebas con Jest
-if (require.main === module) {
-  const { test, expect } = require("@jest/globals");
-
-  test("obtenerDescripcion devuelve la descripción correcta", () => {
-    expect(obtenerDescripcion(0)).toBe("☀️ Cielo despejado");
-    expect(obtenerDescripcion(1)).toBe("🌤 Principalmente despejado");
-    expect(obtenerDescripcion(99)).toBe("⛈⚡ Tormenta eléctrica con granizo");
-  });
-
-  test("procesaDireccionViento devuelve la dirección correcta", () => {
-    expect(procesaDireccionViento(0)).toBe("Norte (N)");
-    expect(procesaDireccionViento(45)).toBe("Noreste (NE)");
-    expect(procesaDireccionViento(180)).toBe("Sur (S)");
-  });
-
-  test("procesaTemperatura devuelve el mensaje adecuado", () => {
-    expect(procesaTemperatura(10)).toBe("🥶 10º - Abrígate");
-    expect(procesaTemperatura(25)).toBe("😎 25º - Buen clima");
-  });
-
-  test("procesaVelocidadViento clasifica correctamente la velocidad", () => {
-    expect(procesaVelocidadViento(5)).toBe("🌬 5 km/h - Frescachón");
-    expect(procesaVelocidadViento(20)).toBe("💨 20 km/h - Temporal");
-  });
-}
- */

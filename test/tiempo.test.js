@@ -1,18 +1,15 @@
-const { obtenInformacionMeteo } = require("../src/tiempo.js");
+process.emitWarning = () => {};
 
-//jest.mock("node-fetch");
-//const fetch = require("node-fetch");
+const {
+  obtenInformacionMeteo,
+  obtenerDescripcion,
+  procesaDireccionViento,
+  procesaTemperatura,
+  procesaVelocidadViento,
+} = require("../src/tiempo.js");
 
-beforeAll(() => {
-  global.fetch = jest.fn().mockResolvedValue({
-    ok: true, // Simula una respuesta exitosa
-    json: jest.fn().mockResolvedValue({ clima: "Principalmente despejado" }), // Respuesta simulada
-  });
-});
-
-afterAll(() => {
-  jest.restoreAllMocks(); // Limpia los mocks después de los tests
-});
+jest.mock("node-fetch");
+const fetch = require("node-fetch");
 
 describe("test infoMeteo ", () => {
   it("debería obtener datos del clima correctamente", async () => {
@@ -24,7 +21,6 @@ describe("test infoMeteo ", () => {
           weathercode: 1,
           windspeed: 10,
           winddirection: 100,
-          time: "2023-10-01t12:00:00z",
         },
       }),
     };
@@ -35,18 +31,38 @@ describe("test infoMeteo ", () => {
     expect(data.current_weather.weathercode).toBe(1);
     expect(data.current_weather.windspeed).toBe(10);
     expect(data.current_weather.winddirection).toBe(100);
-    expect(data.current_weather.time).toBe("2023-10-01t12:00:00z");
+  });
+});
+
+describe("Funciones auxiliares", () => {
+  test("obtenerDescripcion devuelve la descripción correcta", () => {
+    expect(obtenerDescripcion(0)).toBe("☀️ Cielo despejado");
+    expect(obtenerDescripcion(1)).toBe("🌤 Principalmente despejado");
+    expect(obtenerDescripcion(99)).toBe("⛈⚡ Tormenta eléctrica con granizo");
+    expect(obtenerDescripcion(7136484)).toBe("❓ Código desconocido");
   });
 
-  /*  it("debería lanzar un error si la respuesta no es correcta", async () => {
-    const mockResponse = {
-      ok: false,
-      status: 500,
-    };
-    fetch.mockResolvedValue(mockResponse);
+  test("procesaDireccionViento devuelve la dirección correcta", () => {
+    expect(procesaDireccionViento(0)).toBe("Norte (N)");
+    expect(procesaDireccionViento(45)).toBe("Noreste (NE)");
+    expect(procesaDireccionViento(90)).toBe("Este (E)");
+    expect(procesaDireccionViento(135)).toBe("Sureste (SE)");
+    expect(procesaDireccionViento(180)).toBe("Sur (S)");
+    expect(procesaDireccionViento(225)).toBe("Suroeste (SW)");
+    expect(procesaDireccionViento(270)).toBe("Oeste (O)");
+    expect(procesaDireccionViento(315)).toBe("Noroeste (NW)");
+    expect(procesaDireccionViento(-100)).toBe("❓ Valor fuera de rango");
+  });
 
-    await expect(obtenInformacionMeteo(19.4326, -99.1332)).rejects.toThrow(
-      "Error en la solicitud."
-    );
-  }); */
+  test("procesaTemperatura devuelve el mensaje adecuado", () => {
+    // // Test para procesar temperaturas
+    expect(procesaTemperatura(10)).toBe("🥶 10º - Abrígate");
+    expect(procesaTemperatura(25)).toBe("😎 25º - Buen clima");
+    expect(procesaTemperatura(null)).toThrow("Error en la solicitud a la API");
+  });
+
+  test("procesaVelocidadViento clasifica correctamente la velocidad", () => {
+    expect(procesaVelocidadViento(5)).toBe("🌬 5 km/h - Frescachón");
+    expect(procesaVelocidadViento(20)).toBe("💨 20 km/h - Temporal");
+  });
 });
